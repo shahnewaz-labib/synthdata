@@ -101,7 +101,7 @@ doctor_name_with_probabilities = [
     ("Dr. Alex", 0.2),
 ]
 
-columns = {
+income_columns = {
     "Date",
     "Patient ID",
     "Service Name",
@@ -113,17 +113,81 @@ columns = {
     "Doctor Name",
 }
 
+expense_columns = {
+    "Date",
+    "Purpose",
+    "Item",
+    "Quantity",
+    "Recipient",
+    "Amount",
+    "Notes",
+}
+
+expense_purpose_with_probabilities = [
+    ("Material Purchase", 0.3),
+    ("Equipment Purchase", 0.2),
+    ("Utility", 0.1),
+    ("Lab Bill", 0.1),
+    ("Rent", 0.1),
+    ("Marketing", 0.1),
+    ("Maintenance", 0.1),
+    ("Staff Salary", 0.4),
+]
+
+materials_prices = {
+    "Adhesive Bonding Agent": 1500,
+    "Alginate Impression Material": 1800,
+    "Amalgam Filling Material": 2500,
+    "Articulating Paper": 600,
+    "Base Plate Wax": 800,
+    "Beechwood Sticks": 500,
+    "Brass Wire": 400,
+    "Burnishing Instrument": 1100,
+    "Calcium Hydroxide Paste": 1000,
+    "Carbide Burs": 1200,
+    "Composites": 2500,
+    "Cotton Rolls": 150,
+    "Crown & Bridge Remover": 2200,
+    "Curette": 800,
+    "Cushioning Material": 1000,
+    "Cyanoacrylate Adhesive": 150,
+    "Disinfectant Spray": 500,
+    "Endodontic Files": 2000,
+    "Etching Gel": 1000,
+    "Glass Ionomer Cement": 2500,
+    "Gold Alloy": 8000,
+    "Handpieces": 15000,
+    "Hemostatic Agents": 700,
+    "Impression Trays": 1000,
+    "Lab Putty": 1800,
+    "Matrix Bands": 700,
+    "Melting Wax": 600,
+    "Needles (Sterile)": 300,
+    "Orthodontic Brackets": 2500,
+    "Orthodontic Elastics": 800,
+    "Patient Bibs": 100,
+    "Periodontal Probes": 500,
+    "Rubber Dam": 200,
+    "Sodium Hypochlorite": 800,
+    "Spreader (Endodontic)": 1000,
+    "Sterilization Pouches": 400,
+    "Surgical Sutures": 700,
+    "Temporary Filling Material": 900,
+    "Tooth Whitening Gel": 1500,
+    "Universal Bonding Agent": 2000,
+    "X-Ray Film": 250,
+    "Zinc Oxide Eugenol Cement": 1500,
+}
+
 # MM/DD/YYYY
 start_date = "01/01/2021"
 end_date = "12/31/2024"
 
-# add a seed for reproducibility
 np.random.seed(45)
 
-# print header
-print(",".join(columns))
+income_data = []
+expense_data = []
 
-# for each day, generate a random number of records
 for date in pd.date_range(start=start_date, end=end_date):
     num_records = np.random.randint(3, 10)
     for _ in range(num_records):
@@ -147,10 +211,105 @@ for date in pd.date_range(start=start_date, end=end_date):
             paid_amount = 0
             payment_mode = "None"
 
-        # doctor_name = np.random.choice(doctor_name_with_probabilities)
         doctor_name = weighted_random_choice(doctor_name_with_probabilities)
 
-        # print in CSV format
-        print(
-            f"{date.strftime('%m/%d/%Y')},{patient_id},{service_name},{paid_amount},{service_price},{discount_amount},{payment_status},{payment_mode},{doctor_name}"
+        income_data.append(
+            [
+                date.strftime("%m/%d/%Y"),
+                patient_id,
+                service_name,
+                paid_amount,
+                service_price,
+                discount_amount,
+                payment_status,
+                payment_mode,
+                doctor_name,
+            ]
         )
+
+    num_expenses = np.random.randint(1, 5)
+    for _ in range(num_expenses):
+        purpose = weighted_random_choice(expense_purpose_with_probabilities)
+
+        if purpose == "Material Purchase":
+            # Randomly select a material without using weighted random choice
+            item = np.random.choice(list(materials_prices.keys()))
+            amount = materials_prices[item]
+            recipient = "Material Supplier"
+            notes = f"Purchase of {item}"
+
+        elif purpose == "Staff Salary":
+            # Randomly select a doctor and assign a salary
+            doctor = weighted_random_choice(doctor_name_with_probabilities)
+            salary = np.random.randint(
+                10000, 30000
+            )  # Random salary between 10k and 30k
+            item = f"Salary for {doctor}"
+            amount = salary
+            recipient = doctor
+            notes = f"Salary for {doctor}"
+
+        elif purpose == "Utility":
+            # Random utility expenses
+            item = "Electricity/Water Bill"
+            amount = np.random.randint(500, 2000)
+            recipient = "Utility Company"
+            notes = "Monthly utility bill"
+
+        elif purpose == "Lab Bill":
+            # Random lab bill
+            item = "Lab Services"
+            amount = np.random.randint(1000, 5000)
+            recipient = "Lab Service Provider"
+            notes = "Payment for lab services"
+
+        elif purpose == "Rent":
+            # Monthly rent expense
+            item = "Office Rent"
+            amount = np.random.randint(5000, 15000)
+            recipient = "Landlord"
+            notes = "Monthly office rent payment"
+
+        elif purpose == "Marketing":
+            # Marketing expense (e.g., advertising)
+            item = "Advertising"
+            amount = np.random.randint(1000, 5000)
+            recipient = "Advertising Agency"
+            notes = "Marketing campaign costs"
+
+        elif purpose == "Maintenance":
+            # Maintenance expense (e.g., office repairs)
+            item = "Office Maintenance"
+            amount = np.random.randint(500, 3000)
+            recipient = "Maintenance Service Provider"
+            notes = "Maintenance and repairs of office equipment"
+
+        expense_data.append(
+            [date.strftime("%m/%d/%Y"), purpose, item, recipient, amount, notes]
+        )
+
+income_df = pd.DataFrame(
+    income_data,
+    columns=[
+        "Date",
+        "Patient ID",
+        "Service Name",
+        "Paid Amount",
+        "Service Price",
+        "Discount Amount",
+        "Payment Status",
+        "Payment Mode",
+        "Doctor Name",
+    ],
+)
+
+expense_df = pd.DataFrame(
+    expense_data,
+    columns=["Date", "Purpose", "Item", "Recipient", "Amount", "Notes"],
+)
+
+with pd.ExcelWriter("income_and_expense.xlsx") as writer:
+    income_df.to_excel(writer, sheet_name="Income", index=False)
+    expense_df.to_excel(writer, sheet_name="Expense", index=False)
+
+print("Excel file 'income_and_expense.xlsx' has been created.")
