@@ -206,7 +206,7 @@ for date in pd.date_range(start=start_date, end=end_date):
         if payment_status == "Full Paid":
             paid_amount = price_after_discount
         elif payment_status == "Due":
-            paid_amount = round(np.random.randint(100, price_after_discount), -2)
+            paid_amount = round(np.random.randint(100, price_after_discount - 400), -2)
             due_amount = price_after_discount - paid_amount
         else:  # Free
             discount_amount = service_price
