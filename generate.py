@@ -195,21 +195,22 @@ for date in pd.date_range(start=start_date, end=end_date):
         service_name = weighted_random_choice(service_name_with_probabilities)
 
         payment_status = weighted_random_choice(payment_status_with_probabilities)
-        actual_service_price = service_name_with_actual_service_price[service_name]
-        discount_amount = round(np.random.randint(100, actual_service_price // 2), -2)
+        service_price = service_name_with_actual_service_price[service_name]
+        discount_amount = round(np.random.randint(100, service_price // 2), -2)
         payment_mode = weighted_random_choice(payment_mode_with_probabilities)
+        due_amount = 0
 
         if payment_status == "Full Paid":
-            service_price = actual_service_price - discount_amount
             paid_amount = service_price
         elif payment_status == "Due":
-            service_price = actual_service_price - discount_amount
             paid_amount = round(np.random.randint(100, service_price), -2)
+            due_amount = service_price - paid_amount
         else:  # Free
-            discount_amount = actual_service_price
-            service_price = 0
+            discount_amount = service_price
             paid_amount = 0
             payment_mode = "None"
+
+        price_after_discount = service_price - discount_amount
 
         doctor_name = weighted_random_choice(doctor_name_with_probabilities)
 
@@ -218,9 +219,11 @@ for date in pd.date_range(start=start_date, end=end_date):
                 date.strftime("%m/%d/%Y"),
                 patient_id,
                 service_name,
-                paid_amount,
                 service_price,
                 discount_amount,
+                price_after_discount,
+                paid_amount,
+                due_amount,
                 payment_status,
                 payment_mode,
                 doctor_name,
@@ -294,9 +297,11 @@ income_df = pd.DataFrame(
         "Date",
         "Patient ID",
         "Service Name",
-        "Paid Amount",
         "Service Price",
         "Discount Amount",
+        "Price After Discount",
+        "Paid Amount",
+        "Due Amount",
         "Payment Status",
         "Payment Mode",
         "Doctor Name",
