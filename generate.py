@@ -198,19 +198,20 @@ for date in pd.date_range(start=start_date, end=end_date):
         service_price = service_name_with_actual_service_price[service_name]
         discount_amount = round(np.random.randint(100, service_price // 2), -2)
         payment_mode = weighted_random_choice(payment_mode_with_probabilities)
+
+        price_after_discount = service_price - discount_amount
+
         due_amount = 0
 
         if payment_status == "Full Paid":
-            paid_amount = service_price
+            paid_amount = price_after_discount
         elif payment_status == "Due":
-            paid_amount = round(np.random.randint(100, service_price), -2)
-            due_amount = service_price - paid_amount
+            paid_amount = round(np.random.randint(100, price_after_discount), -2)
+            due_amount = price_after_discount - paid_amount
         else:  # Free
             discount_amount = service_price
             paid_amount = 0
             payment_mode = "None"
-
-        price_after_discount = service_price - discount_amount
 
         doctor_name = weighted_random_choice(doctor_name_with_probabilities)
 
